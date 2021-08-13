@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using CSHP330RestAPIProject.Models;
 using CSHP330RestAPIProject.Repository;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
+using CSHP330RestAPIProject.Services;
 
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CSHP330RestAPIProject.Controllers
 {
@@ -16,11 +16,8 @@ namespace CSHP330RestAPIProject.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        //Create Postman requests for each action(export your requests and save it to the repo)
-        //You DO NOT need a database, you can store it internally in a List or Array.
         private IUserRepository _repository;
 
-        //private readonly List<User> userList;
         public UserController(IUserRepository repository)
         {
             if(repository.UserList == null)
@@ -30,7 +27,6 @@ namespace CSHP330RestAPIProject.Controllers
             this._repository = repository;
         }
 
-        // GET: api/<UserController>
         [HttpGet]
         public string Get()
         {
@@ -45,7 +41,6 @@ namespace CSHP330RestAPIProject.Controllers
            
         }
 
-        // GET api/<UserController>/5
         [HttpGet("{id}")]
         public string Get(int id)
         {
@@ -62,15 +57,16 @@ namespace CSHP330RestAPIProject.Controllers
        
         }
 
-        // POST api/<UserController>
         [HttpPost]
         public string Post([FromBody]User user)
         {
             if (ModelState.IsValid)
             {
                 var userList = _repository.UserList;
+                var hashedPwd = new HashPasswordService();
                 user.CreatedDate = DateTime.Now;
                 user.Id = userList.Count + 1;
+                user.UserPassword = hashedPwd.EncryptPassword(user.UserPassword, user.UserEmail);
                 userList.Add(user);
                 return "User Successfully Added. The Users UserID is " + user.Id;
             }
@@ -80,15 +76,15 @@ namespace CSHP330RestAPIProject.Controllers
             }
         }
 
-        // PUT api/<UserController>/5
         [HttpPut("{id}")]
         public string Put(int id, [FromBody] User user)
         {
             try
             {
+                var hashedPwd = new HashPasswordService();
                 User UserToUpdate = _repository.UserList.Where(x => x.Id == id).FirstOrDefault();
                 UserToUpdate.UserEmail = user.UserEmail;
-                UserToUpdate.UserPassword = user.UserPassword;
+                UserToUpdate.UserPassword = hashedPwd.EncryptPassword(user.UserPassword, user.UserEmail);
 
                 return "Successfully Updated User";
             }
@@ -99,7 +95,6 @@ namespace CSHP330RestAPIProject.Controllers
             }
         }
 
-        // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
         public string Delete(int id)
         {
