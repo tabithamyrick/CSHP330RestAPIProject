@@ -2,11 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using CSHP330RestAPIProject.Models;
 using CSHP330RestAPIProject.Repository;
 using Newtonsoft.Json;
-using System.Security.Cryptography;
 using CSHP330RestAPIProject.Services;
 
 
